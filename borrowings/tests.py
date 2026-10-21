@@ -1,10 +1,13 @@
 from datetime import timedelta
+
 from django.contrib.auth import get_user_model
 from django.db import IntegrityError, transaction
 from django.test import TestCase
 from django.utils import timezone
 from rest_framework.test import APIClient
+
 from books.models import Book
+
 from .models import Borrowing
 
 
@@ -115,6 +118,7 @@ class BorrowingTests(TestCase):
 
     def test_failed_creation_rolls_back_inventory(self):
         from unittest.mock import patch
+
         from borrowings.services import create_borrowing
 
         with patch(
