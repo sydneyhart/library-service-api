@@ -127,3 +127,45 @@ class BorrowingTests(TestCase):
                 )
         self.book.refresh_from_db()
         self.assertEqual(self.book.inventory, 2)
+
+    def test_active_filter_and_invalid_boolean(self):
+        Borrowing.objects.create(
+            book=self.book,
+            user=self.user,
+            expected_return_date=self.today,
+            actual_return_date=self.today,
+        )
+        for value, count in [("true", 1), ("false", 1), ("1", 1), ("0", 1)]:
+            self.assertEqual(
+                self.client.get(f"/api/borrowings/?is_active={value}").data["count"],
+                count,
+            )
+        self.assertEqual(
+            self.client.get("/api/borrowings/?is_active=perhaps").status_code, 400
+        )
+
+    def test_staff_sees_all_and_can_filter_by_customer(self):
+        other = Borrowing.objects.create(
+            book=self.book, user=self.other, expected_return_date=self.today
+        )
+        self.user.is_staff = True
+        self.user.save()
+        self.assertEqual(self.client.get("/api/borrowings/").data["count"], 2)
+        response = self.client.get(f"/api/borrowings/?user_id={self.other.pk}")
+        self.assertEqual(response.data["count"], 1)
+        self.assertEqual(response.data["results"][0]["id"], other.pk)
+        self.assertEqual(
+            self.client.get(f"/api/borrowings/{other.pk}/").status_code, 200
+        )
+        for value in ["bad", "0", "-1"]:
+            self.assertEqual(
+                self.client.get(f"/api/borrowings/?user_id={value}").status_code, 400
+            )
+
+    def test_customer_user_id_filter_cannot_expose_other_records(self):
+        Borrowing.objects.create(
+            book=self.book, user=self.other, expected_return_date=self.today
+        )
+        response = self.client.get(f"/api/borrowings/?user_id={self.other.pk}")
+        self.assertEqual(response.data["count"], 1)
+        self.assertEqual(response.data["results"][0]["user"], self.user.pk)
