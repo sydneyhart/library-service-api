@@ -1,0 +1,11 @@
+[tool.ruff]
+line-length = 88
+exclude = ["*/migrations/*"]
+
+[tool.coverage.run]
+source = ["books", "users", "borrowings"]
+omit = ["*/migrations/*", "*/tests/*", "*/tests.py", "*/apps.py", "*/admin.py"]
+
+[tool.coverage.report]
+fail_under = 60
+show_missing = true
