@@ -74,3 +74,35 @@ class BookCrudTests(TestCase):
 
     def test_string_representation(self):
         self.assertEqual(str(Book(**self.payload)), "Dune by Frank Herbert")
+
+
+class BookPermissionTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.book = Book.objects.create(
+            title="Dune", author="Herbert", cover="SOFT", inventory=1, daily_fee="1.00"
+        )
+        self.url = f"/api/books/{self.book.pk}/"
+
+    def test_anonymous_can_read(self):
+        self.assertEqual(self.client.get("/api/books/").status_code, 200)
+        self.assertEqual(self.client.get(self.url).status_code, 200)
+
+    def test_anonymous_cannot_write(self):
+        for method, url in [
+            ("post", "/api/books/"),
+            ("put", self.url),
+            ("patch", self.url),
+            ("delete", self.url),
+        ]:
+            self.assertEqual(getattr(self.client, method)(url, {}).status_code, 401)
+
+    def test_customer_cannot_write(self):
+        self.client.force_authenticate(account("customer@example.com"))
+        for method, url in [
+            ("post", "/api/books/"),
+            ("put", self.url),
+            ("patch", self.url),
+            ("delete", self.url),
+        ]:
+            self.assertEqual(getattr(self.client, method)(url, {}).status_code, 403)
