@@ -1,17 +1,57 @@
 name: Test
 on: [push, pull_request]
 jobs:
-  tests:
+  sqlite:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ['3.11', '3.13']
     env:
       SECRET_KEY: ci-only-long-secret-not-for-production-library-project
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: ${{ matrix.python }}
       - run: pip install -r requirements-dev.txt
-      - run: python manage.py test --settings=config.test_settings
+      - run: coverage run manage.py test --settings=config.test_settings && coverage report && coverage xml
       - run: python manage.py makemigrations --check --dry-run
+      - run: python manage.py spectacular --file /tmp/schema.yml --validate --fail-on-warn
       - run: ruff check . && ruff format --check .
       - run: pip check
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-python-${{ matrix.python }}
+          path: coverage.xml
+  postgres:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: library
+          POSTGRES_USER: library
+          POSTGRES_PASSWORD: ci-only-password
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U library -d library"
+          --health-interval 2s --health-timeout 5s --health-retries 30
+    env:
+      SECRET_KEY: ci-only-long-secret-not-for-production-library-project
+      DATABASE_HOST: localhost
+      DATABASE_NAME: library
+      DATABASE_USER: library
+      DATABASE_PASSWORD: ci-only-password
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements-dev.txt
+      - run: coverage run manage.py test --settings=config.test_settings && coverage report
+      - run: python manage.py migrate && python manage.py seed_demo --with-users
+      - run: |
+          python manage.py runserver 127.0.0.1:8030 --noreload > /tmp/library.log 2>&1 &
+          python scripts/smoke_test.py
+      - run: cat /tmp/library.log
+        if: failure()

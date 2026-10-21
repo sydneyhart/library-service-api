@@ -1,0 +1,8 @@
+Name,Description,List,Labels
+Task 1 - Book CRUD,"Book model, migration, CRUD endpoints and inventory/fee validation. Branch codex/01-books-crud.",On Review,Books
+Task 2 - Book permissions,"Public reads and staff-only writes. Depends on task 1. Branch codex/02-book-permissions.",On Review,Permissions
+Task 3 - User accounts,"Email registration, custom Authorize JWT header and own-profile updates. Branch codex/03-user-accounts.",On Review,Users
+Task 4 - Borrowing list and detail,"Dated borrowing records and nested book information. Depends on tasks 1 and 3. Branch codex/04-borrowing-list-detail.",On Review,Borrowings
+Task 5 - Create borrowing,"Atomic stock decrement, current-user ownership and out-of-stock handling. Depends on task 4. Branch codex/05-create-borrowing.",On Review,Borrowings
+Task 6 - Borrowing filters,"Active/returned and staff user filtering with owner isolation. Depends on task 4. Branch codex/06-borrowing-filters.",On Review,Permissions
+Task 7 - Return borrowing,"One-time return, stock restoration and five-user PostgreSQL contention tests. Depends on tasks 5 and 6. Branch codex/07-return-borrowing.",On Review,Borrowings
