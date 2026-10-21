@@ -118,6 +118,7 @@ class BorrowingTests(TestCase):
 
     def test_failed_creation_rolls_back_inventory(self):
         from unittest.mock import patch
+
         from borrowings.services import create_borrowing
 
         with patch(
