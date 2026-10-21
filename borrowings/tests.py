@@ -73,3 +73,57 @@ class BorrowingTests(TestCase):
 
     def test_string_representation(self):
         self.assertIn("Dune", str(self.borrowing))
+
+    def test_create_borrowing_decreases_stock_and_sets_current_user(self):
+        response = self.client.post(
+            "/api/borrowings/",
+            {
+                "book": self.book.pk,
+                "expected_return_date": str(self.today),
+                "user": self.other.pk,
+                "borrow_date": "1999-01-01",
+                "actual_return_date": str(self.today),
+            },
+        )
+        self.assertEqual(response.status_code, 201)
+        self.book.refresh_from_db()
+        self.assertEqual(self.book.inventory, 1)
+        created = Borrowing.objects.get(pk=response.data["id"])
+        self.assertEqual(created.user, self.user)
+        self.assertEqual(created.borrow_date, self.today)
+        self.assertIsNone(created.actual_return_date)
+        self.assertEqual(response.data["book"]["title"], "Dune")
+
+    def test_out_of_stock_invalid_date_and_missing_book_are_rejected(self):
+        payload = {"book": self.book.pk, "expected_return_date": str(self.today)}
+        for fields in [
+            {"expected_return_date": str(self.today - timedelta(days=1))},
+            {"expected_return_date": "bad"},
+            {"book": 999},
+        ]:
+            self.assertEqual(
+                self.client.post("/api/borrowings/", {**payload, **fields}).status_code,
+                400,
+            )
+        Book.objects.filter(pk=self.book.pk).update(inventory=0)
+        self.assertEqual(self.client.post("/api/borrowings/", payload).status_code, 400)
+        self.assertEqual(Borrowing.objects.count(), 1)
+
+    def test_anonymous_cannot_borrow(self):
+        self.client.force_authenticate(None)
+        self.assertEqual(self.client.post("/api/borrowings/", {}).status_code, 401)
+
+    def test_failed_creation_rolls_back_inventory(self):
+        from unittest.mock import patch
+        from borrowings.services import create_borrowing
+
+        with patch(
+            "borrowings.services.Borrowing.objects.create",
+            side_effect=RuntimeError("failure"),
+        ):
+            with self.assertRaises(RuntimeError):
+                create_borrowing(
+                    user=self.user, book=self.book, expected_return_date=self.today
+                )
+        self.book.refresh_from_db()
+        self.assertEqual(self.book.inventory, 2)
