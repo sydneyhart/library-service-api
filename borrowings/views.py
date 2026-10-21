@@ -1,11 +1,14 @@
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import mixins, viewsets
+from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from .models import Borrowing
 from .serializers import BorrowingCreateSerializer, BorrowingReadSerializer
+from .services import return_borrowing
 
 
 class BorrowingViewSet(
@@ -70,3 +73,18 @@ class BorrowingViewSet(
     )
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
+
+    @extend_schema(
+        request=None,
+        responses=BorrowingReadSerializer,
+        description="Return your book once. Staff may return any customer's borrowing. Records the current date and restores one copy atomically; a repeated return is rejected.",
+    )
+    @action(detail=True, methods=["post"], url_path="return")
+    def return_book(self, request, pk=None):
+        borrowing = self.get_object()
+        borrowing = return_borrowing(borrowing_id=borrowing.pk)
+        return Response(
+            BorrowingReadSerializer(
+                borrowing, context=self.get_serializer_context()
+            ).data
+        )

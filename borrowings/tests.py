@@ -173,3 +173,46 @@ class BorrowingTests(TestCase):
         response = self.client.get(f"/api/borrowings/?user_id={self.other.pk}")
         self.assertEqual(response.data["count"], 1)
         self.assertEqual(response.data["results"][0]["user"], self.user.pk)
+
+    def test_return_restores_stock_and_repeated_return_is_rejected(self):
+        response = self.client.post(self.url + "return/")
+        self.assertEqual(response.status_code, 200)
+        self.book.refresh_from_db()
+        self.borrowing.refresh_from_db()
+        self.assertEqual(self.book.inventory, 3)
+        self.assertEqual(self.borrowing.actual_return_date, self.today)
+        self.assertEqual(response.data["book"]["inventory"], 3)
+        self.assertEqual(self.client.post(self.url + "return/").status_code, 400)
+        self.book.refresh_from_db()
+        self.assertEqual(self.book.inventory, 3)
+
+    def test_other_customer_and_anonymous_cannot_return(self):
+        self.client.force_authenticate(self.other)
+        self.assertEqual(self.client.post(self.url + "return/").status_code, 404)
+        self.client.force_authenticate(None)
+        self.assertEqual(self.client.post(self.url + "return/").status_code, 401)
+        self.book.refresh_from_db()
+        self.assertEqual(self.book.inventory, 2)
+
+    def test_staff_can_return_customer_borrowing(self):
+        self.other.is_staff = True
+        self.other.save()
+        self.client.force_authenticate(self.other)
+        self.assertEqual(self.client.post(self.url + "return/").status_code, 200)
+
+    def test_failed_stock_update_rolls_back_return(self):
+        from unittest.mock import patch
+
+        from borrowings.services import return_borrowing
+
+        with patch(
+            "borrowings.services.Book.objects.filter",
+            side_effect=RuntimeError("failure"),
+        ):
+            with self.assertRaises(RuntimeError):
+                return_borrowing(borrowing_id=self.borrowing.pk)
+        self.borrowing.refresh_from_db()
+        self.assertIsNone(self.borrowing.actual_return_date)
+
+    def test_return_rejects_get(self):
+        self.assertEqual(self.client.get(self.url + "return/").status_code, 405)

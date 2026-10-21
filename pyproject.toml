@@ -4,7 +4,7 @@ exclude = ["*/migrations/*"]
 
 [tool.coverage.run]
 source = ["books", "users", "borrowings"]
-omit = ["*/migrations/*", "*/tests/*", "*/tests.py", "*/apps.py", "*/admin.py"]
+omit = ["*/migrations/*", "*/tests/*", "*/tests.py", "*/test_*.py", "*/apps.py", "*/admin.py"]
 
 [tool.coverage.report]
 fail_under = 60
