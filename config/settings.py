@@ -19,6 +19,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_spectacular",
     "books",
+    "users",
 ]
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -99,3 +100,6 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }
+
+AUTH_USER_MODEL = "users.User"
+SIMPLE_JWT["TOKEN_OBTAIN_SERIALIZER"] = "users.serializers.EmailTokenSerializer"
