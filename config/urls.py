@@ -10,6 +10,7 @@ def api_root(request):
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("api/books/", include("books.urls")),
     path("api/", api_root, name="api-root"),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="docs"),
