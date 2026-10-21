@@ -14,7 +14,7 @@ Django REST Framework implementation of **Flex Library Practice tasks 1–7**. M
 | 6 | Active/returned filtering and staff customer filtering | `codex/06-borrowing-filters` |
 | 7 | One-time return, actual return date and atomic inventory restoration | `codex/07-return-borrowing` |
 
-Each task has a separate PR targeting `main`; review in numeric order because later tasks depend on earlier ones. The `develop` branch contains the complete integration. The Flex brief allows 6–8 chosen tasks, so Stripe payments, Telegram notifications and scheduled jobs are outside this seven-task selection.
+[Review task PRs #1–#7](https://github.com/sydneyhart/library-service-api/pulls). Each task has a separate PR targeting `main`; review in numeric order because later tasks depend on earlier ones. The `develop` branch contains the complete integration. The Flex brief allows 6–8 chosen tasks, so Stripe payments, Telegram notifications and scheduled jobs are outside this seven-task selection.
 
 ## Run locally
 
@@ -151,3 +151,10 @@ Coverage is enforced at **60% minimum** for custom application code, excluding t
 [Task plan](docs/task-plan.md) records the dependency order. [Trello-ready CSV](docs/trello-tasks.csv) contains the seven cards for a board with **To Do (Backlog)**, **In Progress (Doing)**, **On Review**, and **Done (Completed)** columns. A prepared CSV is not a live Trello board; board access is handled separately.
 
 The `main` branch starts with the project foundation. Task PRs are open for review; no teammate approvals or merges are fabricated. The full-time requirement for two teammate approvals is not part of this individual Flex selection.
+
+## Browsable API captures
+
+![Public book catalogue](docs/screenshots/books.jpg)
+![Own borrowing history](docs/screenshots/borrowings.jpg)
+
+[Borrowing detail](docs/screenshots/borrowing-detail.jpg) · [Own profile](docs/screenshots/profile.jpg)

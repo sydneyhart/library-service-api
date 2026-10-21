@@ -17,3 +17,13 @@ Recommended review/merge order: 1 → 2 → 3 → 4 → 5 → 6 → 7. Later bra
 To Do → In Progress → On Review → Done. Move a card to Done only after its PR is actually merged; passing tests alone does not mean merged.
 
 Shared quality criteria: at least 60% custom-code coverage, Swagger documentation, setup instructions, no secrets/redundant files committed, descriptive branches and commits.
+
+## Task PRs
+
+- [Task 1](https://github.com/sydneyhart/library-service-api/pull/1)
+- [Task 2](https://github.com/sydneyhart/library-service-api/pull/2)
+- [Task 3](https://github.com/sydneyhart/library-service-api/pull/3)
+- [Task 4](https://github.com/sydneyhart/library-service-api/pull/4)
+- [Task 5](https://github.com/sydneyhart/library-service-api/pull/5)
+- [Task 6](https://github.com/sydneyhart/library-service-api/pull/6)
+- [Task 7](https://github.com/sydneyhart/library-service-api/pull/7)
