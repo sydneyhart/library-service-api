@@ -150,7 +150,7 @@ Coverage is enforced at **60% minimum** for custom application code, excluding t
 
 [Task plan](docs/task-plan.md) records the dependency order. [Trello-ready CSV](docs/trello-tasks.csv) contains the seven cards for a board with **To Do (Backlog)**, **In Progress (Doing)**, **On Review**, and **Done (Completed)** columns. A prepared CSV is not a live Trello board; board access is handled separately.
 
-The `main` branch starts with the project foundation. Task PRs are open for review; no teammate approvals or merges are fabricated. The full-time requirement for two teammate approvals is not part of this individual Flex selection.
+The `main` branch starts with the project foundation. Each task PR records its review/merge state on GitHub; use those recorded states when submitting closed PR links. The full-time requirement for two teammate approvals is not part of this individual Flex selection.
 
 ## Browsable API captures
 
